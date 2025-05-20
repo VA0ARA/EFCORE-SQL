@@ -135,3 +135,4 @@ D:\Project\EFCORELEARNING\EFCORELEARNING\bin\Debug\net8.0\runtimes\win\lib\net6.
 D:\Project\EFCORELEARNING\EFCORELEARNING\obj\Debug\net8.0\EFCORELEARNING.csproj.AssemblyReference.cache
 D:\Project\EFCORELEARNING\EFCORELEARNING\obj\Debug\net8.0\EFCORELE.C3A24B6F.Up2Date
 D:\Project\EFCORELEARNING\EFCORELEARNING\bin\Debug\net8.0\CustomerArray.json
+D:\Project\EFCORELEARNING\EFCORELEARNING\obj\Debug\net8.0\EFCORELEARNING.sourcelink.json

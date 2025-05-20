@@ -1,4 +1,5 @@
 ﻿using EFCORELEARNING.DATA.Configurations;
+using EFCORELEARNING.DTOs;
 using EFCORELEARNING.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,6 +23,8 @@ namespace EFCORELEARNING.DATA
              modelBuilder.ApplyConfiguration(new OrderConfiguration());
              modelBuilder.ApplyConfiguration(new OrderDetailConfiguration());
              modelBuilder.ApplyConfiguration(new ProductConfiguration());
+             modelBuilder.ApplyConfiguration(new OrderDtoConfiguration());
+            
 
             base.OnModelCreating(modelBuilder);
         }
@@ -30,6 +33,8 @@ namespace EFCORELEARNING.DATA
         public DbSet<EFCORELEARNING.Models.Employee> Employees { get; set; }
         public DbSet<EFCORELEARNING.Models.Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        // just for query
+        public DbSet<OrderDto> OrderDtos { get; set; }
         public DbSet<Product> Products { get; set; }
         //1. Seedata >> with Gsoon File In Program.cs
 
