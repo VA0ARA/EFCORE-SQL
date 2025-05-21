@@ -24,7 +24,8 @@ namespace EFCORELEARNING.DATA
              modelBuilder.ApplyConfiguration(new OrderDetailConfiguration());
              modelBuilder.ApplyConfiguration(new ProductConfiguration());
              modelBuilder.ApplyConfiguration(new OrderDtoConfiguration());
-            
+             modelBuilder.ApplyConfiguration(new CustomerOrderDetailDtoConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }
@@ -35,6 +36,7 @@ namespace EFCORELEARNING.DATA
         public DbSet<OrderDetail> OrderDetails { get; set; }
         // just for query
         public DbSet<OrderDto> OrderDtos { get; set; }
+        public DbSet<OrderDto> CustomerOrderDetailDtos { get; set; }
         public DbSet<Product> Products { get; set; }
         //1. Seedata >> with Gsoon File In Program.cs
 

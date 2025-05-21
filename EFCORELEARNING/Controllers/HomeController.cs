@@ -308,12 +308,580 @@ namespace EFCORELEARNING.Controllers
                  .GroupBy(o => new { o.CustomerID, OrderYear = o.OrderDate.Year })
                  .Select(g => new { g.Key.CustomerID, g.Key.OrderYear, NumOrders = g.Count(), TotalFreight = g.Sum(o => o.Freight) })
                  .ToList();
+            //            SELECT
+
+            //    TOP(5) WITH TIES CustomerID,
+            // COUNT(OrderID) AS Num
+            //FROM dbo.Orders
+            //GROUP BY CustomerID
+            //ORDER BY Num DESC;
+            //            GO
+            var top5Customers = _Context.Orders
+                .GroupBy(o => o.CustomerID)
+                .Select(g => new { g.Key, Num = g.Count() })
+                .OrderByDescending(g => g.Num)
+                .Take(5)
+                .ToList();
+            //            SELECT
+            //                EmployeeID,
+
+            //    COUNT(OrderID) AS Num
+            //FROM dbo.Orders
+            //WHERE EmployeeID BETWEEN 1 AND 3
+            //GROUP BY ALL EmployeeID
+            //ORDER BY EmployeeID; GO
+            var resultde = (from order in _Context.Orders
+                         where order.EmployeeID >= 1 && order.EmployeeID <= 3
+                         group order by order.EmployeeID into g
+                         orderby g.Key
+                         select new
+                         {
+                             EmployeeID = g.Key,
+                             Num = g.Count()
+                         }).ToList();
+            //            SELECT
+            //    EmployeeID,
+
+            //    COUNT(OrderID) AS Num
+            //FROM dbo.Orders
+            //    WHERE EmployeeID BETWEEN 1 AND 3
+            //GROUP BY ALL EmployeeID
+
+            //    HAVING COUNT(OrderID) > 100
+            //ORDER BY EmployeeID;
+            //            GO
+            //            
+            var resultty = (from order in _Context.Orders
+                           where order.EmployeeID >= 1 && order.EmployeeID <= 3
+                         group order by order.EmployeeID into g
+                         where g.Count() > 100 //having
+                         orderby g.Key
+                         select new
+                         {
+                             EmployeeID = g.Key,
+                             Num = g.Count()
+                         }).ToList();
+
+
+
             #endregion
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult JoinsAndSetOpertores()
         {
+            #region Cross join=(*)
+            //SELECT
+            // CustomerID, EmployeeID
+            //FROM dbo.Customers
+            //CROSS JOIN dbo.Employees;
+            //GO
+            var result = (from customer in _Context.Customers
+                         from employee in _Context.Employees
+                         select new
+                         {
+                             customer.CurtomerId,
+                             employee.EmployeeID
+                         }).ToList();
+
+            #endregion
+            #region SELFE JOIN 
+            // SELECT
+
+            //E1.FirstName, E1.LastName,
+            //E2.FirstName, E2.LastName
+            //FROM dbo.Employees AS E1
+            //CROSS JOIN dbo.Employees AS E2
+            //ORDER BY E1.FirstName, E1.LastName;
+            //GO
+            var resultr = (from e1 in _Context.Employees
+                           from e2 in _Context.Employees
+                         orderby e1.FirstName, e1.LastName
+                         select new
+                         {
+                             E1_FirstName = e1.FirstName,
+                             E1_LastName = e1.LastName,
+                             E2_FirstName = e2.FirstName,
+                             E2_LastName = e2.LastName
+                         }).ToList();
+
+            #endregion
+            #region INNER JOIN=natural join>>have same property
+            //SELECT
+
+            //E.FirstName, E.LastName,
+            //O.OrderID
+            //FROM dbo.Employees AS E
+            //JOIN dbo.Orders AS O
+            //ON E.EmployeeID = O.EmployeeID;
+            // GO
+            var resultn = (from e in _Context.Employees
+                         join o in _Context.Orders on e.EmployeeID equals o.EmployeeID
+                         select new
+                         {
+                             e.FirstName,
+                             e.LastName,
+                             o.OrderID
+                         }).ToList();
+            // SELECT
+
+            // C.City,
+            //COUNT(O.OrderID) AS Num
+            //FROM dbo.Customers AS C
+            //JOIN dbo.Orders AS O
+            // ON C.CustomerID = O.CustomerID
+            //GROUP BY C.City
+            //HAVING COUNT(O.OrderID) > 50;
+            // GO
+            // 
+            var resultj = (from c in _Context.Customers
+                         join o in _Context.Orders on c.CurtomerId equals o.CustomerID
+                         group o by c.City into g
+                         where g.Count() > 50 //having
+                         select new
+                         {
+                             City = g.Key,
+                             Num = g.Count()
+                         }).ToList();
+            //SELECT
+
+            //TOP(3) WITH TIES P.ProductName,
+            //SUM(OD.Qty) AS Total
+            //FROM dbo.Products AS P
+            //JOIN dbo.OrderDetails AS OD
+            //ON P.ProductID = OD.ProductID
+            //GROUP BY P.ProductName
+            //ORDER BY Total DESC;
+            //GO
+            var grouped = from od in _Context.OrderDetails
+                          join p in _Context.Products on od.ProductID equals p.ProductID
+                          group od by p.ProductName into g
+                          select new
+                          {
+                              ProductName = g.Key,
+                              Total = g.Sum(x => (int)x.Qty)
+                          };
+
+            var topTotal = grouped
+                          .OrderByDescending(g => g.Total)
+                          .Take(3)
+                          .ToList();
+
+            int thirdValue = topTotal.Last().Total;//  use for TOP (3) WITH TIES
+
+            var resulte = (grouped
+                .Where(g => g.Total >= thirdValue)
+                .OrderByDescending(g => g.Total)).ToList();//TOP (3) WITH TIES
+
+
+            #endregion
+            #region Muilti join 
+            //SELECT
+
+            //  C.CompanyName,
+            //O.OrderID,
+            //OD.ProductID,
+            //OD.Qty
+            //FROM dbo.Customers AS C
+            //JOIN dbo.Orders AS O
+            // ON C.CustomerID = O.CustomerID
+            //JOIN dbo.OrderDetails AS OD
+            //ON O.OrderID = OD.OrderID;
+            //  GO
+            var resulttt = from c in _Context.Customers
+                         join o in _Context.Orders on c.CurtomerId equals o.CustomerID into ordersGroup
+                         from o in ordersGroup.DefaultIfEmpty()
+                         join od in _Context.OrderDetails on o.OrderID equals od.OrderID into detailsGroup
+                         from od in detailsGroup.DefaultIfEmpty()
+                         where o != null // اگر بخوای فقط سفارش‌هایی که وجود داره، این شرط رو بذار، یا حذفش کن
+                         select new
+                         {
+                             CompanyName = c.CompanyName,
+                             OrderID = o != null ? o.OrderID : 0,
+                             ProductID = od != null ? od.ProductID : 0,
+                             Qty = od != null ? od.Qty : (short)0
+                         };
+
+            var list = resulttt.ToList();
+            //SELECT
+
+            // C.CustomerID, C.CompanyName,
+            //COUNT(DISTINCT O.OrderID) AS NumOrders,
+            //SUM(OD.Qty) AS TotalQuantity
+            //FROM dbo.Customers AS C
+            //JOIN dbo.Orders AS O
+            //ON C.CustomerID = O.CustomerID
+            //JOIN dbo.OrderDetails AS OD
+            //ON O.OrderID = OD.OrderID
+
+            //WHERE C.State = N'تهران'
+            //GROUP BY C.CustomerID, C.CompanyName;
+            // GO
+            //buge!!!!!!!!!!!!!!!!!!!!!!
+            var resultrt = _Context.Customers
+                .Where(c => c.State == "تهران")
+                .Join(_Context.Orders, c => c.CurtomerId, o => o.CustomerID, (c, o) => new { c, o })
+                .Join(_Context.OrderDetails, co => co.o.OrderID, od => od.OrderID, (co, od) => new { co.c, co.o, od })
+                .GroupBy(x => new { x.c.CurtomerId, x.c.CompanyName })
+                .Select(g => new
+                {
+                    CustomerID = g.Key.CurtomerId,
+                    CompanyName = g.Key.CompanyName,
+                    NumOrders = g.Select(x => x.o.OrderID).Distinct().Count(),
+                    TotalQuantity = g.Sum(x => x.od.Qty)
+                })
+                .ToList();
+
+
+
+
+            #endregion
+            #region OuterJoin 
+            // SELECT
+
+            // C.CustomerID, C.CompanyName,
+            //O.OrderID,
+            //OD.ProductID,
+            //OD.Qty
+            //FROM dbo.Customers AS C
+            //LEFT JOIN dbo.Orders AS O
+            // ON C.CustomerID = O.CustomerID
+            //LEFT JOIN dbo.OrderDetails AS OD
+            // ON O.OrderID = OD.OrderID;
+            // GO
+            
+            var query = _Context.Customers
+                               .GroupJoin(_Context.Orders,
+                               c => c.CurtomerId,
+                               o => o.CustomerID,
+                               (c, ordersGroup) => new { c, ordersGroup })
+                               .SelectMany(
+                               x => x.ordersGroup.DefaultIfEmpty(),
+                               (x, o) => new { x.c, o })
+                               .GroupJoin(_Context.OrderDetails,
+                               co => co.o != null ? co.o.OrderID : 0,
+                               od => od.OrderID,
+                               (co, detailsGroup) => new { co.c, co.o, detailsGroup })
+                               .SelectMany(
+                               x => x.detailsGroup.DefaultIfEmpty(),
+                               (x, od) => new
+                               {
+                               CustomerID = x.c.CurtomerId,
+                               CompanyName = x.c.CompanyName,
+                               OrderID = x.o != null ? x.o.OrderID : (int?)null,
+                               ProductID = od != null ? od.ProductID : (int?)null,
+                               Qty = od != null ? od.Qty : (short?)null
+                               })
+                               .ToList();
+            //SQL Query
+                      var sql = @"
+                             SELECT
+                                 C.CurtomerId, C.CompanyName,
+                                 O.OrderID,
+                                 OD.ProductID,
+                                 OD.Qty
+                             FROM dbo.Customers AS C
+                             LEFT JOIN dbo.Orders AS O
+                                 ON C.CurtomerId = O.CustomerID
+                             LEFT JOIN dbo.OrderDetails AS OD
+                                 ON O.OrderID = OD.OrderID";
+
+            var resultdf = _Context.Set<CustomerOrderDetailDto>()
+                                  .FromSqlRaw(sql)
+                                  .ToList();
+
+
+            #endregion
+            #region Set Operator
+            //SELECT
+            // State, Region, City FROM dbo.Employees
+            //UNION ALL
+            //SELECT
+
+            // State, Region, City FROM dbo.Customers
+            //ORDER BY Region;
+            // GO
+                               var resultghj = _Context.Employees
+                   .Select(e => new { e.State, e.Region, e.City })
+                   .Concat(
+                   _Context.Customers
+                   .Select(c => new { c.State, c.Region, c.City })
+                   )
+                   .OrderBy(x => x.Region)
+                   .ToList();
+
+            //SELECT
+            // State, Region, City FROM dbo.Employees
+            //INTERSECT
+            //SELECT
+            // State, Region, City FROM dbo.Customers;
+            // GO
+            //buge !!!!!!!!!!!!!!!!
+            var employeeLocations = _Context.Employees
+                .Select(e => new { e.State, e.Region, e.City });
+
+            var customerLocations = _Context.Customers
+                .Select(c => new { c.State, c.Region, c.City });
+
+            var intersected = employeeLocations
+                .Intersect(customerLocations)
+                .ToList();
+
+            var employeeLocationsm = _Context.Employees
+           .Select(e => new { e.State, e.Region, e.City });
+
+            var customerLocationsm = _Context.Customers
+                .Select(c => new { c.State, c.Region, c.City });
+
+            var exceptResult = employeeLocations
+                .Except(customerLocations)
+                .ToList();
+
+
+
+
+            #endregion
+            return View();
+        }
+        public IActionResult Question()
+        {
+            #region Q1
+            //What is the difference in days between the newest and oldest order for each customer from Isfahan
+            /*            SELECT
+                         TOP(1) WITH TIES C.CustomerID,
+                        COUNT(O.OrderID) AS Num
+                        FROM dbo.Customers AS C
+                        JOIN dbo.Orders AS O
+                         ON C.CustomerID = O.CustomerID
+                        WHERE C.City = N'تهران'
+                        GROUP BY C.CustomerID
+                        ORDER BY Num;
+                        GO*/
+      
+          
+            var query = (from c in _Context.Customers
+                         join o in _Context.Orders on c.CurtomerId equals o.CustomerID
+                         where c.City == "تهران"
+                         group o by c.CurtomerId into g
+                         select new
+                         {
+                             CustomerId = g.Key,
+                             Num = g.Count()
+                         })
+                        .ToList();
+
+            if (query.Any())
+            {
+                var minOrderCount = query.Min(x => x.Num);
+
+                var topCustomers = query
+                    .Where(x => x.Num == minOrderCount)
+                    .ToList();
+
+               
+            }
+            else
+            {
+                Console.WriteLine("No Way.");
+            }
+
+
+
+            #endregion
+            #region Q2
+            //How many orders of the product 'Orange Juice' have customers from the provinces Tehran or Kerman placed?"
+            /*            SELECT
+                C.CustomerID,C.State,
+                SUM(OD.Qty) AS Total
+            FROM dbo.Customers AS C
+            JOIN dbo.Orders AS O
+                ON C.CustomerID = O.CustomerID
+            JOIN dbo.OrderDetails AS OD
+                ON O.OrderID = OD.OrderID
+            JOIN dbo.Products AS P
+                ON OD.ProductID = P.ProductID
+                WHERE P.ProductName = N'آب پرتقال'
+                AND C.City IN(N'تهران',N'کرمان')
+            GROUP BY C.CustomerID, C.State;
+                        GO*/
+            var result = (from c in _Context.Customers
+                          join o in _Context.Orders on c.CurtomerId equals o.CustomerID
+                          join od in _Context.OrderDetails on o.OrderID equals od.OrderID
+                          join p in _Context.Products on od.ProductID equals p.ProductID
+                          where p.ProductName == "آب پرتقال"
+                                && 
+                                (c.City == "تهران" || c.City == "کرمان")
+                          group od by new { c.CurtomerId, c.City } into g
+                          select new
+                          {
+                              CustomerID = g.Key.CurtomerId,
+                              State = g.Key.City,
+                              Total = g.Sum(x => x.Qty)
+                          }).ToList();
+            #endregion
+            #region Q3
+            //What is the difference in days between the newest and oldest order of each customer from Isfahan?"
+            /*            SELECT
+                C.CustomerID,
+                DATEDIFF(DAY, MIN(O.OrderDate), MAX(O.OrderDate)) AS Day_Diff
+            FROM dbo.Customers AS C
+            JOIN dbo.Orders AS O
+                ON C.CustomerID = O.CustomerID
+                WHERE C.State = N'اصفهان'
+            GROUP BY C.CustomerID;
+                        GO*/
+            var result55 = (from c in _Context.Customers
+                          join o in _Context.Orders on c.CurtomerId equals o.CustomerID
+                          where c.City == "اصفهان"
+                          group o by c.CurtomerId into g
+                          select new
+                          {
+                              CustomerID = g.Key,
+                              Day_Diff = EF.Functions.DateDiffDay(g.Min(x => x.OrderDate), g.Max(x => x.OrderDate))
+                          })
+              .ToList();
+
+
+            #endregion
+            #region Q4
+            //Which customers have never set any orders and have their State field as NULL
+            /*            SELECT
+                C.CustomerID
+            FROM Customers AS C
+            LEFT JOIN dbo.Orders AS O
+                ON C.CustomerID = O.CustomerID
+                WHERE C.State IS NULL
+            GROUP BY C.CustomerID
+                HAVING COUNT(O.OrderID) = 0;
+                        GO*/
+            var customersWithoutOrders = _Context.Customers
+                             .Where(c => c.State == null)
+                             .GroupJoin(
+                                 _Context.Orders,
+                                 c => c.CurtomerId,
+                                 o => o.CustomerID,
+                                 (c, orders) => new { Customer = c, Orders = orders }
+                             )
+                             .Where(co => !co.Orders.Any()) 
+                             .Select(co => co.Customer.CurtomerId)
+                             .ToList();
+
+            #endregion
+            #region Q5
+            //How many order for Customer who live in Zanjan?
+            /*            SELECT
+                C.CustomerID,
+                COUNT(O.OrderID) AS Num
+            FROM dBO.Customers AS C
+            LEFT JOIN dbo.Orders AS O
+                ON C.CustomerID = O.CustomerID
+                WHERE C.City = N'زنجان'
+            GROUP BY C.CustomerID;
+                        GO*/
+            var resultdd = _Context.Customers
+                              .Where(c => c.City == "زنجان")
+                              .GroupJoin(
+                                  _Context.Orders,
+                                  c => c.CurtomerId,
+                                  o => o.CustomerID,
+                                  (c, orders) => new
+                                  {
+                                      CustomerID = c.CurtomerId,
+                                      Num = orders.Count()
+                                  }
+                              )
+                                  .ToList();
+
+            #endregion
+            #region Q6
+            //Which customer has old more than 50 and his or her orders more than 100?
+            var resultmkn = _Context.Employees
+                               .Where(e => EF.Functions.DateDiffYear(e.Birthdate, DateTime.Now) > 50)
+                               .Join(
+                                   _Context.Orders,
+                                   e => e.EmployeeID,
+                                   o => o.EmployeeID,
+                                   (e, o) => new { e.LastName, e.EmployeeID }
+                               )
+                               .GroupBy(x => x.LastName)
+                               .Where(g => g.Count() > 100)
+                               .Select(g => new
+                               {
+                                   LastName = g.Key,
+                                   Num_Orders = g.Count()
+                               })
+                               .ToList();
+
+
+            /*            SELECT
+                E.LastName,
+                COUNT(O.OrderID) AS Num_Orders
+            FROM dbo.Employees AS E
+            JOIN dbo.Orders AS O
+                ON E.EmployeeID = O.EmployeeID
+                WHERE DATEDIFF(YEAR, E.Birthdate, GETDATE()) > 50
+            GROUP BY E.LastName
+                HAVING COUNT(O.OrderID) > 100;
+                        GO*/
+            #endregion
+            #region Q7
+            //have list of customer that did not set order from 2015-05-01?
+            /*            SELECT
+                E.EmployeeID, E.FirstName, E.LastName
+            FROM dbo.Employees AS E
+            EXCEPT
+            SELECT
+                E.EmployeeID, E.FirstName, E.LastName
+            FROM dbo.Employees AS E
+            JOIN dbo.Orders AS O
+                ON E.EmployeeID = O.EmployeeID
+                WHERE O.OrderDate BETWEEN '20160501' AND GETDATE()
+            GROUP BY E.EmployeeID, E.FirstName, E.LastName;
+                        GO*/
+            var today = DateTime.Now;
+            var fromDate = new DateTime(2016, 5, 1);
+
+            // Step 1: 
+            var employeesWithOrdersInRange = _Context.Orders
+                .Where(o => o.OrderDate >= fromDate && o.OrderDate <= today)
+                .Select(o => o.EmployeeID)
+                .Distinct();
+
+            // Step 2: 
+            var resultxcv = _Context.Employees
+                .Where(e => !employeesWithOrdersInRange.Contains(e.EmployeeID))
+                .Select(e => new
+                {
+                    e.EmployeeID,
+                    e.FirstName,
+                    e.LastName
+                })
+                .ToList();
+
+            #endregion
+            #region Q8
+            //number of orders in second of 6 months for each year 
+            /*            SELECT
+             YEAR(OrderDate)AS OrderDate,
+             COUNT(OrderID)AS NUM
+            FROM Orders
+                WHERE MONTH(OrderDate) > 6
+            GROUP BY ALL YEAR(OrderDate);
+                        GO*/
+            var resultxv = _Context.Orders
+                          .Where(o => o.OrderDate.Month > 6)
+                          .GroupBy(o => o.OrderDate.Year)
+                          .Select(g => new
+                          {
+                              OrderDate = g.Key,
+                              NUM = g.Count()
+                          });
+            string sql = resultxv.ToQueryString();
+            Console.WriteLine(sql);
+            var resultdfgh = resultxv.ToList();
+
+
+            #endregion
             return View();
         }
 
