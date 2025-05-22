@@ -18,6 +18,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = D:\Project\EFCORELEARNING\EFCORELEARNING
 build_property._RazorSourceGeneratorDebug = 
 
+[D:/Project/EFCORELEARNING/EFCORELEARNING/Views/Home/Fundamental.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxGdW5kYW1lbnRhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Project/EFCORELEARNING/EFCORELEARNING/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -28,6 +32,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/Project/EFCORELEARNING/EFCORELEARNING/Views/Home/Question.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxRdWVzdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Project/EFCORELEARNING/EFCORELEARNING/Views/Home/Subquery.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxTdWJxdWVyeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Project/EFCORELEARNING/EFCORELEARNING/Views/Home/Viewss.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxWaWV3c3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Project/EFCORELEARNING/EFCORELEARNING/Views/Shared/Error.cshtml]

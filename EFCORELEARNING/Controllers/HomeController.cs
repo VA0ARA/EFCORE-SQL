@@ -6,10 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EFCORELEARNING.Controllers
 {
-    // for test every thing in this Project use debuger ti understand what happen!!!!!!
+    // for test every thing in this Project use debuger to understand what happen!!!!!!
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -20,8 +21,11 @@ namespace EFCORELEARNING.Controllers
             _logger = logger;
             _Context = context; 
         }
-
-        public IActionResult Index()
+         public IActionResult Index()
+        {
+            return View();
+        }
+        public IActionResult Fundamental()
         {
             #region SELECT-AsNoTracking-ToQueryString()
             //1.EF-Linq
@@ -367,7 +371,6 @@ namespace EFCORELEARNING.Controllers
             #endregion
             return View();
         }
-
         public IActionResult JoinsAndSetOpertores()
         {
             #region Cross join=(*)
@@ -882,6 +885,211 @@ namespace EFCORELEARNING.Controllers
 
 
             #endregion
+            return View();
+        }
+        public IActionResult Subquery()
+        {
+            #region  01 - Self-Contained Scalar-Valued
+            //Independent subquery for the most recently placed order
+            //SELECT
+            // EmployeeID, CustomerID, OrderID, OrderDate
+            //FROM dbo.Orders
+            // WHERE OrderID = (SELECT MAX(OrderID) FROM dbo.Orders);
+            // GO
+            var latestOrder =_Context.Orders
+                        .Where(o => o.OrderID == _Context.Orders.Max(x => x.OrderID))
+                        .Select(o => new {
+                        o.EmployeeID,
+                        o.CustomerID,
+                        o.OrderID,
+                        o.OrderDate
+                        })
+                        .FirstOrDefault();
+            //"-- Independent subquery to get the number of orders per customer along with the total number of orders placed"
+            // SELECT
+            // CustomerID,
+
+            // COUNT(OrderID) AS Num,
+            //(SELECT COUNT(OrderID) FROM dbo.Orders) AS Total--یک بار اجرا میشود
+            //FROM dbo.Orders
+            //GROUP BY CustomerID;
+            //GO
+            var totalOrderCount = (from o in _Context.Orders
+                                   select o).Count();
+
+            var result = (from o in _Context.Orders
+                          group o by o.CustomerID into g
+                          select new
+                          {
+                              CustomerID = g.Key,
+                              Num = g.Count(),
+                              Total = totalOrderCount
+                          }).ToList();
+            #endregion
+            #region 02 - Self-Contained Multi-Valued
+            //SELECT
+            // EmployeeID, OrderID
+            //FROM dbo.Orders
+            // WHERE EmployeeID IN(SELECT E.EmployeeID FROM dbo.Employees AS E
+            // WHERE E.lastname LIKE N'ت%'); --کارمندان: تقوی / تهرانی
+            //GO
+            var employeeIds = (from e in _Context.Employees
+                               where e.LastName.StartsWith("ت")
+                               select e.EmployeeID).ToList();
+
+            var orders = (from o in _Context.Orders
+                          where employeeIds.Contains(o.EmployeeID)
+                          select new
+                          {
+                              o.EmployeeID,
+                              o.OrderID
+                          }).ToList();
+            //SELECT* FROM dbo.Customers
+            //WHERE CustomerID NOT IN(SELECT CustomerID FROM dbo.Orders);
+            //GO
+           //1>>8ms
+            var orderedCustomerIds = _Context.Orders
+                .Select(o => o.CustomerID)
+                .Distinct()
+                .ToList();
+            var customersWithoutOrders1 = _Context.Customers
+                .Where(c => !orderedCustomerIds.Contains(c.CurtomerId));
+                
+            Console.WriteLine(customersWithoutOrders1.ToQueryString());
+            var ListOfOrders1 = customersWithoutOrders1.ToList();
+            //2.This is more efficient than 1 >>3ms
+            var customersWithoutOrders2 = _Context.Customers
+                        .GroupJoin(
+                            _Context.Orders,
+                            c => c.CurtomerId,
+                            o => o.CustomerID,
+                            (c, orders) => new { Customer = c, Orders = orders }
+                        )
+                        .Where(co => !co.Orders.Any())
+                        .Select(co => co.Customer);
+                        
+            Console.WriteLine(customersWithoutOrders2.ToQueryString());
+            var ListOfOrders2 = customersWithoutOrders2.ToList();
+            #endregion
+            #region 03 - Correlated Subquery
+            //"-- SELECT using a correlated subquery to display the most recent order ID for each customer"
+            //in select
+            //SELECT
+            //DISTINCT O1.CustomerID,
+            //(SELECT MAX(O2.OrderID) FROM dbo.Orders AS O2
+            //WHERE O1.CustomerID = O2.CustomerID) AS NewOrder
+            //FROM dbo.Orders AS O1;
+            //  GO
+            var result2 = (from o in _Context.Orders
+                           group o by o.CustomerID into g
+                           select new
+                           {
+                               CustomerID = g.Key,
+                               NewOrder = g.Max(x => x.OrderID)
+                           }).ToList();
+            //in from
+            //SELECT
+            //O1.CustomerID,
+            //O1.OrderID
+            //FROM dbo.Orders AS O1
+            //WHERE O1.OrderID = (SELECT MAX(O2.OrderID) FROM dbo.Orders AS O2
+            //WHERE O1.CustomerID = O2.CustomerID);
+            //GO
+            var latestOrders = (from o1 in _Context.Orders
+                               where o1.OrderID == (from o2 in _Context.Orders
+                               where o2.CustomerID == o1.CustomerID
+                               select o2.OrderID).Max()
+                               select new
+                               {
+                                   o1.CustomerID,
+                                   o1.OrderID
+                               }).ToList();
+            //3
+            //SELECT* FROM dbo.Customers AS C
+            //WHERE EXISTS(SELECT 1 FROM dbo.Orders AS O
+            //WHERE C.CustomerID = O.CustomerID);
+            //GO
+                   var customersWithOrders = _Context.Customers
+                         .Where(c => _Context.Orders.Any(o => o.CustomerID == c.CurtomerId))
+                         .ToList();
+            //  SELECT* FROM dbo.Customers AS C
+            // WHERE NOT EXISTS(SELECT 1 FROM dbo.Orders AS O
+            // WHERE C.CustomerID = O.CustomerID);
+            // GO
+            var customersWithoutOrders = (from c in _Context.Customers
+                                          where !(from o in _Context.Orders
+                                                  where o.CustomerID == c.CurtomerId
+                                                  select o).Any()
+                                          select c).ToList();
+
+
+            #endregion
+            #region 01 - Derived Table
+            // SELECT* FROM
+            //(SELECT
+            // C.CompanyName,
+            //(SELECT COUNT(O.OrderID) FROM dbo.Orders AS O
+            //WHERE C.CustomerID = O.CustomerID
+            //HAVING COUNT(O.OrderID) > 10) AS Num
+            //FROM dbo.Customers AS C) AS Tmp
+
+            // WHERE Tmp.Num > 10;
+            //  GO 
+            //1Method Syntax
+            var resultjj = _Context.Customers
+                        .Where(c => _Context.Orders.Count(o => o.CustomerID == c.CurtomerId) > 10)
+                        .Select(c => new {
+                        c.CompanyName,
+                        Num = _Context.Orders.Count(o => o.CustomerID == c.CurtomerId)
+                        })
+                        .ToList();
+            //2GroupJoin 
+            var resultjjj = _Context.Customers
+                              .GroupJoin(
+                                  _Context.Orders,
+                                  c => c.CurtomerId,
+                                  o => o.CustomerID,
+                                  (c, orders) => new {
+                                      c.CompanyName,
+                                      Num = orders.Count()
+                                  })
+                              .Where(x => x.Num > 10)
+                              .ToList();
+            //CTE
+            /*  WITH CustPerYear
+  AS
+  (
+      SELECT
+
+          YEAR(OrderDate) AS OrderYear,
+          CustomerID
+
+      FROM dbo.Orders
+  )
+  SELECT
+
+      CY.OrderYear,
+      COUNT(DISTINCT CY.CustomerID) AS Customers_Num
+  FROM CustPerYear AS CY
+  GROUP BY CY.OrderYear;
+              GO*/
+                      var resultjjjj = _Context.Orders
+                                 .GroupBy(o => o.OrderDate.Year)
+                                 .Select(g => new {
+                                 OrderYear = g.Key,
+                                 Customers_Num = g
+                                 .Select(o => o.CustomerID)
+                                 .Distinct()
+                                 .Count()
+                                 })
+                                 .ToList();
+
+
+            #endregion
+            return View();
+        }
+        public IActionResult Viewss()
+        {
             return View();
         }
 
