@@ -4,6 +4,7 @@ using EFCORELEARNING.DATA;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFCORELEARNING.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250523045254_AddCustomerOrderSummaryProc")]
+    partial class AddCustomerOrderSummaryProc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,19 +42,6 @@ namespace EFCORELEARNING.Migrations
 
                     b.Property<short?>("Qty")
                         .HasColumnType("smallint");
-
-                    b.ToTable((string)null);
-
-                    b.ToView(null, (string)null);
-                });
-
-            modelBuilder.Entity("EFCORELEARNING.DTOs.CustomerOrderSummary", b =>
-                {
-                    b.Property<int>("CustomerID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Num")
-                        .HasColumnType("int");
 
                     b.ToTable((string)null);
 
@@ -116,15 +106,6 @@ namespace EFCORELEARNING.Migrations
                         .HasColumnType("nvarchar(30)");
 
                     b.HasKey("CurtomerId");
-
-                    b.HasIndex("City")
-                        .HasDatabaseName("IX_Customer_City");
-
-                    b.HasIndex("CurtomerId")
-                        .HasDatabaseName("IX_Customer_CurtomerId");
-
-                    b.HasIndex("Region")
-                        .HasDatabaseName("IX_Customer_Region");
 
                     b.ToTable("Customers", (string)null);
                 });
@@ -328,16 +309,9 @@ namespace EFCORELEARNING.Migrations
 
                     b.HasKey("OrderID");
 
-                    b.HasIndex("CustomerID")
-                        .HasDatabaseName("IX_Order_CustomerID");
+                    b.HasIndex("CustomerID");
 
                     b.HasIndex("EmployeeID");
-
-                    b.HasIndex("OrderDate")
-                        .HasDatabaseName("IX_Order_OrderDate");
-
-                    b.HasIndex("OrderID")
-                        .HasDatabaseName("IX_Order_OrderID");
 
                     b.ToTable("Orders", (string)null);
                 });

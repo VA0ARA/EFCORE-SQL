@@ -1,12 +1,54 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Project\\EFCORELEARNING\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE4FA33-AE3B-4F04-A6C5-B37FAC9CE0EE}|EFCORELEARNING\\EFCORELEARNING.csproj|d:\\project\\efcorelearning\\efcorelearning\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6FE4FA33-AE3B-4F04-A6C5-B37FAC9CE0EE}|EFCORELEARNING\\EFCORELEARNING.csproj|solutionrelative:efcorelearning\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6FE4FA33-AE3B-4F04-A6C5-B37FAC9CE0EE}|EFCORELEARNING\\EFCORELEARNING.csproj|d:\\project\\efcorelearning\\efcorelearning\\migrations\\20250523061621_viewindexcustomerorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6FE4FA33-AE3B-4F04-A6C5-B37FAC9CE0EE}|EFCORELEARNING\\EFCORELEARNING.csproj|solutionrelative:efcorelearning\\migrations\\20250523061621_viewindexcustomerorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 1,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "20250523061621_viewIndexCustomerOrder.cs",
+              "DocumentMoniker": "D:\\Project\\EFCORELEARNING\\EFCORELEARNING\\Migrations\\20250523061621_viewIndexCustomerOrder.cs",
+              "RelativeDocumentMoniker": "EFCORELEARNING\\Migrations\\20250523061621_viewIndexCustomerOrder.cs",
+              "ToolTip": "D:\\Project\\EFCORELEARNING\\EFCORELEARNING\\Migrations\\20250523061621_viewIndexCustomerOrder.cs",
+              "RelativeToolTip": "EFCORELEARNING\\Migrations\\20250523061621_viewIndexCustomerOrder.cs",
+              "ViewState": "AQIAAAgAAAAAAAAAAAAqwA0AAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-23T07:01:07.969Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\Project\\EFCORELEARNING\\EFCORELEARNING\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "EFCORELEARNING\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\Project\\EFCORELEARNING\\EFCORELEARNING\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "EFCORELEARNING\\Controllers\\HomeController.cs",
+              "ViewState": "AQIAAF0EAAAAAAAAAAAAAEAEAAAqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-23T04:18:43.978Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }

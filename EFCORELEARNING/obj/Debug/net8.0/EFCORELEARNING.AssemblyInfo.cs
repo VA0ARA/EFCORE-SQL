@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EFCORELEARNING")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d519c53566946da386d9557029b94079f5614d1a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7b072cda6678a3a2c813d20464d496a8c2f03c70")]
 [assembly: System.Reflection.AssemblyProductAttribute("EFCORELEARNING")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EFCORELEARNING")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

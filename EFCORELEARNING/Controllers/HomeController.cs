@@ -3,10 +3,8 @@ using EFCORELEARNING.DTOs;
 using EFCORELEARNING.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 using System.Diagnostics;
-using System.Text.RegularExpressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+
 
 namespace EFCORELEARNING.Controllers
 {
@@ -1088,8 +1086,58 @@ namespace EFCORELEARNING.Controllers
             #endregion
             return View();
         }
-        public IActionResult Viewss()
+        public IActionResult CreateIndex()
         {
+            #region Simple Index
+            int customerId = 5; 
+
+            var orders = _Context.Orders
+                                .Where(o => o.CustomerID == customerId)
+                                .OrderByDescending(o => o.OrderDate)
+                                .ToList();
+            #endregion
+            #region ViewIndex
+            var summaries = _Context.Set<CustomerOrderIndex>().ToList();
+            #endregion
+
+            return View();
+        }
+        public IActionResult Procdure()
+        {
+            //DerivedTable
+            #region Outer Query: Orders cost of 44%
+            //            SELECT Tmp.CustomerID, Tmp.Num FROM
+            //            (
+            //            SELECT
+            //                O.CustomerID,
+            //                (SELECT COUNT(OD.OrderID) FROM dbo.OrderDetails AS OD
+            //                    WHERE O.OrderID = OD.OrderID
+
+            //                    HAVING COUNT(OrderID) > 5) AS Num
+            //FROM dbo.Orders AS O
+            //GROUP BY O.CustomerID, O.OrderID
+            //) AS Tmp
+            //WHERE Tmp.Num IS NOT NULL
+            //GROUP BY Tmp.CustomerID, Tmp.Num;
+            //            GO
+            #endregion
+            #region  Derived Table   cost of 14%
+            //            SELECT Tmp.CustomerID, Tmp.Num FROM
+            //(
+            //SELECT
+            //    O.CustomerID,
+            //    (SELECT COUNT(OD.OrderID) FROM dbo.OrderDetails AS OD
+            //        WHERE O.OrderID = OD.OrderID) AS Num
+            //FROM dbo.Orders AS O
+            //GROUP BY O.CustomerID, O.OrderID
+            //) AS Tmp
+            //WHERE Tmp.Num > 5
+            //GROUP BY Tmp.CustomerID, Tmp.Num;
+            //            GO
+            #endregion
+            var result = _Context.CustomerOrderSummaries
+                          .FromSqlRaw("EXEC GetCustomersWithMoreThanFiveOrderDetails")
+                          .ToList();
             return View();
         }
 
