@@ -1,0 +1,1 @@
+Here's a comprehensive list of practical strategies to optimize query performance in Entity Framework Core, written in professional English. These techniques cover indexing, query structure, tracking behavior, projections, and more
